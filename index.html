@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compañero — prototipo de experiencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Grotesk:wght@300..700&family=Nunito:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LA CASA DEL COMPAÑERO — three rooms, three temperaments
+   memoria  = el cuarto de las historias (paper, copper, Fraunces)
+   trabajo  = el estudio              (slate, steel, Space Grotesk)
+   familia  = la cocina               (sage, leaf, Nunito)
+   ============================================================ */
+:root { --ease: cubic-bezier(.22,.9,.28,1); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body[data-room="memoria"] {
+  --bg:#f6efe3; --panel:#fffdf7; --scene:#efe3cd; --scene-deep:#e2cfa9;
+  --ink:#3a2e22; --muted:#96876f; --accent:#a95f2e; --accent-deep:#6f4423;
+  --accent-soft:#f0ddc6; --border:#e6d8bf; --bubble:#fffdf7;
+  --font:'Fraunces',Georgia,serif; --font-ui:'Fraunces',Georgia,serif;
+}
+body[data-room="trabajo"] {
+  --bg:#eef2f5; --panel:#fdfeff; --scene:#dde7ee; --scene-deep:#b9cfdd;
+  --ink:#22303a; --muted:#7b8b96; --accent:#38688c; --accent-deep:#1f4258;
+  --accent-soft:#d8e5ee; --border:#d5dfe7; --bubble:#fdfeff;
+  --font:'Space Grotesk',system-ui,sans-serif; --font-ui:'Space Grotesk',system-ui,sans-serif;
+}
+body[data-room="familia"] {
+  --bg:#f2f5ea; --panel:#fefff8; --scene:#e3ebd2; --scene-deep:#c6d6a8;
+  --ink:#2c3324; --muted:#82896f; --accent:#5b7d4a; --accent-deep:#3d5a30;
+  --accent-soft:#e2ebd2; --border:#dde4cb; --bubble:#fefff8;
+  --font:'Nunito',system-ui,sans-serif; --font-ui:'Nunito',system-ui,sans-serif;
+}
+
+html,body { height:100%; }
+body {
+  font-family:var(--font); background:var(--bg); color:var(--ink);
+  transition:background .8s var(--ease);
+  overflow:hidden;
+}
+
+/* ---------------- layout ---------------- */
+#house { display:grid; grid-template-columns:250px 1fr 300px; height:100vh; opacity:0; }
+#house.revealed { opacity:1; transition:opacity .9s var(--ease); }
+
+/* ---------------- the directory (left rail) ---------------- */
+#rail {
+  display:flex; flex-direction:column; border-right:1px solid var(--border);
+  background:var(--panel); transition:background .8s var(--ease);
+  padding:26px 18px 18px; z-index:5;
+}
+#wordmark {
+  font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+  font-size:1.5rem; letter-spacing:-.01em; margin:2px 8px 4px;
+}
+#wordmark small { display:block; font-style:normal; font-size:.68rem; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
+.room {
+  display:flex; gap:12px; align-items:center; text-align:left; width:100%;
+  font-family:var(--font-ui); cursor:pointer; border:1px solid transparent;
+  background:none; border-radius:16px; padding:12px 12px; margin-top:10px;
+  color:var(--ink); transition:all .25s var(--ease);
+}
+.room .glyph {
+  width:44px; height:44px; flex:none; border-radius:14px; font-size:1.25rem;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg); border:1px solid var(--border); transition:all .25s;
+}
+.room .rname { display:block; font-weight:600; font-size:.95rem; }
+.room .rrole { display:block; font-size:.72rem; color:var(--muted); line-height:1.25; margin-top:2px; }
+.room:hover { border-color:var(--border); }
+.room.active { background:var(--accent-soft); border-color:var(--accent); }
+.room.locked { opacity:.4; cursor:default; }
+.room.locked:hover { border-color:transparent; }
+.room.active .glyph { background:var(--accent); border-color:var(--accent); }
+#rail .spacer { flex:1; }
+.rail-btn {
+  font-family:var(--font-ui); font-size:.82rem; cursor:pointer; width:100%;
+  background:none; border:1px solid var(--border); border-radius:12px;
+  padding:9px 12px; color:var(--muted); margin-top:8px; text-align:left;
+  transition:all .2s;
+}
+.rail-btn:hover { border-color:var(--accent); color:var(--accent); }
+#chip {
+  display:none; margin-top:10px; padding:10px 12px; border-radius:12px;
+  background:var(--accent); color:#fff; font-size:.82rem; font-family:var(--font-ui);
+}
+#chip b { display:block; font-size:.95rem; }
+
+/* ---------------- conversation (center) ---------------- */
+#stage { display:flex; flex-direction:column; min-width:0; }
+#roomhead {
+  padding:18px 26px 0; display:flex; align-items:baseline; gap:12px; min-width:0;
+}
+#roomhead h1 { font-size:1.35rem; font-weight:500; letter-spacing:-.01em; flex:none; }
+#roomhead .cap { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body[data-room="trabajo"] #roomhead h1 { font-weight:600; }
+body[data-room="familia"] #roomhead h1 { font-weight:800; }
+#roomhead .cap { font-size:.8rem; color:var(--muted); font-style:italic; }
+body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
+#chat { flex:1; overflow-y:auto; padding:20px 26px 8px; }
+.thread { max-width:640px; margin:0 auto; }
+.msg { margin-bottom:18px; display:flex; flex-direction:column; animation:rise .45s var(--ease) both; }
+@keyframes rise { from { opacity:0; transform:translateY(10px); } }
+.bubble {
+  padding:13px 17px; border-radius:18px; line-height:1.6; font-size:.98rem;
+  white-space:pre-wrap; max-width:88%; overflow-wrap:anywhere;
+}
+.msg.user { align-items:flex-end; }
+.msg.user .bubble { background:var(--accent); color:#fff; border-bottom-right-radius:6px; }
+.msg.bot .bubble { background:var(--bubble); border:1px solid var(--border); border-bottom-left-radius:6px; box-shadow:0 1px 0 rgba(60,50,30,.04); }
+.srcs { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.src {
+  font-family:var(--font-ui); font-size:.74rem; color:var(--accent);
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:3px 11px;
+  cursor:default;
+}
+.thinking .bubble { display:flex; align-items:baseline; gap:8px; color:var(--muted); font-style:italic; }
+.dots i { display:inline-block; font-style:normal; animation:blink 1.2s infinite; }
+.dots i:nth-child(2) { animation-delay:.2s; } .dots i:nth-child(3) { animation-delay:.4s; }
+@keyframes blink { 0%,60%,100% { opacity:.2; } 30% { opacity:1; } }
+.caret::after { content:'▍'; color:var(--accent); animation:blink 1s infinite; font-size:.85em; }
+
+.starters { display:flex; flex-direction:column; gap:8px; margin:14px auto 4px; max-width:460px; }
+.starter {
+  font-family:var(--font-ui); text-align:left; cursor:pointer; font-size:.88rem;
+  background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:11px 15px; color:var(--ink); transition:all .2s;
+}
+.starter:hover { border-color:var(--accent); transform:translateX(3px); }
+.hint { text-align:center; color:var(--muted); font-size:.76rem; margin-top:8px; }
+
+#composer { padding:14px 26px 18px; }
+#composer .row { max-width:640px; margin:0 auto; display:flex; gap:10px; }
+#input {
+  flex:1; font-family:var(--font); font-size:.97rem; resize:none; color:var(--ink);
+  border:1px solid var(--border); border-radius:24px; padding:13px 20px;
+  outline:none; background:var(--panel); max-height:120px; transition:border-color .2s;
+}
+#input:focus { border-color:var(--accent); }
+#send {
+  font-family:var(--font-ui); font-size:.92rem; font-weight:600; cursor:pointer; border:none;
+  background:var(--accent); color:#fff; border-radius:24px; padding:0 24px;
+  transition:filter .2s;
+}
+#send:hover { filter:brightness(1.08); }
+
+/* ---------------- the room scene (right) ---------------- */
+#scene {
+  position:relative; overflow:hidden; border-left:1px solid var(--border);
+  background:linear-gradient(160deg,var(--scene),var(--scene-deep));
+  transition:background .8s var(--ease);
+}
+#scene .caption {
+  position:absolute; bottom:26px; left:0; right:0; text-align:center;
+  font-family:'Fraunces',serif; font-style:italic; font-size:1.02rem; color:var(--accent-deep);
+}
+.vignette { position:absolute; inset:0; opacity:0; transition:opacity .8s var(--ease); pointer-events:none; }
+.vignette.on { opacity:1; }
+
+/* memoria: pendulum clock + dust motes */
+#v-memoria .clock { position:absolute; top:64px; left:50%; transform:translateX(-50%); width:120px; }
+#v-memoria .face { width:120px; height:120px; border-radius:50%; background:var(--panel); border:3px solid var(--accent-deep); position:relative; box-shadow:0 10px 30px rgba(80,50,20,.18); }
+#v-memoria .face::before { content:''; position:absolute; inset:10px; border-radius:50%; border:1px dashed var(--accent); opacity:.5; }
+#v-memoria .hand { position:absolute; left:50%; top:50%; width:2px; background:var(--accent-deep); transform-origin:top center; }
+#v-memoria .hand.h { height:26px; transform:rotate(305deg); }
+#v-memoria .hand.m { height:38px; transform:rotate(72deg); }
+#v-memoria .pendulum { width:2px; height:120px; background:var(--accent-deep); margin:0 auto; transform-origin:top center; animation:swing 2.4s ease-in-out infinite; position:relative; }
+#v-memoria .pendulum::after { content:''; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); width:26px; height:26px; border-radius:50%; background:var(--accent); box-shadow:inset -3px -3px 0 rgba(0,0,0,.15); }
+@keyframes swing { 0%,100% { transform:rotate(11deg); } 50% { transform:rotate(-11deg); } }
+#v-memoria .mote { position:absolute; width:5px; height:5px; border-radius:50%; background:var(--accent-deep); opacity:.18; animation:mote 9s linear infinite; }
+@keyframes mote { from { transform:translateY(0) translateX(0); } to { transform:translateY(-46vh) translateX(3vw); } }
+
+/* trabajo: desk lamp + paper stack */
+#v-trabajo .lamp { position:absolute; top:70px; left:50%; transform:translateX(-50%); width:10px; height:150px; background:var(--accent-deep); }
+#v-trabajo .lamp::before { content:''; position:absolute; top:-26px; left:-28px; width:66px; height:40px; background:var(--accent); border-radius:34px 34px 6px 6px; }
+#v-trabajo .lamp::after { content:''; position:absolute; top:14px; left:-42px; width:94px; height:200px;
+  background:linear-gradient(to bottom, rgba(255,236,170,.5), rgba(255,236,170,0)); clip-path:polygon(28% 0,72% 0,100% 100%,0 100%); }
+#v-trabajo .desk { position:absolute; top:224px; left:50%; transform:translateX(-50%); width:170px; height:10px; background:var(--accent-deep); border-radius:4px; }
+#v-trabajo .paper { position:absolute; top:194px; width:64px; height:12px; background:var(--panel); border:1px solid var(--border); border-radius:2px; }
+#v-trabajo .paper.p1 { left:calc(50% - 66px); transform:rotate(-4deg); }
+#v-trabajo .paper.p2 { left:calc(50% - 60px); top:184px; transform:rotate(2deg); }
+#v-trabajo .paper.p3 { left:calc(50% + 4px); transform:rotate(3deg); }
+#v-trabajo .plant { position:absolute; top:262px; left:50%; transform:translateX(-50%); font-size:0; }
+#v-trabajo .grid-bg { position:absolute; inset:0; background-image:linear-gradient(rgba(31,66,88,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(31,66,88,.05) 1px,transparent 1px); background-size:26px 26px; }
+
+/* familia: kettle with steam */
+#v-familia .stove { position:absolute; top:230px; left:50%; transform:translateX(-50%); width:150px; height:12px; background:var(--accent-deep); border-radius:6px; }
+#v-familia .kettle { position:absolute; top:170px; left:50%; transform:translateX(-50%); width:86px; height:62px; background:var(--accent); border-radius:12px 12px 40px 40px; box-shadow:inset -6px -6px 0 rgba(0,0,0,.12); }
+#v-familia .kettle::before { content:''; position:absolute; top:-16px; left:26px; width:34px; height:16px; border:4px solid var(--accent-deep); border-bottom:none; border-radius:18px 18px 0 0; }
+#v-familia .kettle::after { content:''; position:absolute; top:6px; right:-18px; width:20px; height:14px; background:var(--accent); clip-path:polygon(0 20%,100% 0,100% 100%,0 80%); }
+#v-familia .steam { position:absolute; width:10px; height:26px; border-radius:50%; background:rgba(255,255,255,.85); filter:blur(4px); animation:steam 3s ease-in infinite; }
+@keyframes steam { 0% { transform:translateY(0) scale(.7); opacity:0; } 30% { opacity:.9; } 100% { transform:translateY(-90px) scale(1.5); opacity:0; } }
+#v-familia .sun { position:absolute; top:44px; right:36px; width:54px; height:54px; border-radius:50%; background:radial-gradient(circle,#ffe9a8,#ffd873); box-shadow:0 0 40px rgba(255,216,115,.5); }
+
+/* ---------------- drawer (cuaderno + perfil) ---------------- */
+#drawer {
+  position:fixed; top:0; right:-380px; width:340px; max-width:92vw; height:100vh;
+  background:var(--panel); border-left:1px solid var(--border); z-index:30;
+  transition:right .3s var(--ease); padding:22px; overflow-y:auto;
+}
+#drawer.open { right:0; box-shadow:-20px 0 60px rgba(40,30,15,.12); }
+#drawer h2 { font-size:1.02rem; font-weight:600; margin-bottom:4px; }
+#drawer .sub { font-size:.78rem; color:var(--muted); margin-bottom:12px; line-height:1.4; }
+#drawer label { display:block; font-size:.72rem; color:var(--muted); margin:10px 0 3px; font-family:var(--font-ui); }
+#drawer input,#drawer select {
+  width:100%; font-family:var(--font-ui); font-size:.88rem; padding:8px 11px; color:var(--ink);
+  border:1px solid var(--border); border-radius:10px; background:var(--bg); outline:none;
+}
+#drawer input:focus,#drawer select:focus { border-color:var(--accent); }
+#save-profile { margin-top:12px; width:100%; font-family:var(--font-ui); font-weight:600; font-size:.86rem; cursor:pointer; background:var(--accent); color:#fff; border:none; border-radius:11px; padding:10px; }
+.divider { border:none; border-top:1px solid var(--border); margin:20px 0 14px; }
+.fact { display:flex; gap:8px; align-items:flex-start; padding:10px 12px; border:1px solid var(--border); border-radius:11px; margin-bottom:8px; font-size:.85rem; }
+.fact.pinned { border-color:var(--accent); background:var(--accent-soft); }
+.fact .t { flex:1; }
+.fact button { background:none; border:none; cursor:pointer; font-size:.8rem; opacity:.5; }
+.fact button:hover { opacity:1; }
+#proto-note { font-size:.7rem; color:var(--muted); text-align:center; margin-top:22px; line-height:1.5; }
+
+/* ---------------- toast ---------------- */
+#toast {
+  position:fixed; bottom:88px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:var(--ink); color:var(--bg); font-family:var(--font-ui); font-size:.84rem;
+  padding:10px 20px; border-radius:22px; opacity:0; transition:all .35s var(--ease);
+  pointer-events:none; z-index:40;
+}
+#toast.show { opacity:.95; transform:translateX(-50%) translateY(0); }
+
+/* ---------------- unboxing ---------------- */
+#unboxing {
+  position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(1200px 700px at 20% 10%, #4b3524, transparent),
+    radial-gradient(1000px 700px at 85% 90%, #5d4426, transparent),
+    #3a2c1e;
+  transition:opacity 1s var(--ease), visibility 1s;
+}
+#unboxing.gone { opacity:0; visibility:hidden; }
+#gift {
+  width:min(480px,88vw); text-align:center; color:#f6ecd9; padding:46px 40px 40px;
+  background:linear-gradient(165deg,#584231,#463323);
+  border:1px solid rgba(246,236,217,.14); border-radius:26px;
+  box-shadow:0 40px 100px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
+  position:relative; overflow:hidden;
+  animation:giftin 1.1s var(--ease) both .2s;
+}
+@keyframes giftin { from { opacity:0; transform:translateY(26px) scale(.97); } }
+#gift::before { content:''; position:absolute; top:0; bottom:0; left:50%; width:54px; transform:translateX(-50%); background:rgba(190,120,60,.16); pointer-events:none; }
+#gift > * { position:relative; }
+#gift .para { font-family:'Fraunces',serif; font-style:italic; font-size:1.05rem; opacity:.75; letter-spacing:.08em; }
+#gift h1 { font-family:'Fraunces',serif; font-weight:400; font-size:3.1rem; letter-spacing:-.02em; margin:10px 0 6px; }
+#gift .de { font-family:'Fraunces',serif; font-size:1rem; opacity:.85; }
+#gift .que { margin:26px auto 0; max-width:320px; font-size:.9rem; line-height:1.65; opacity:.7; font-family:'Fraunces',serif; }
+#open {
+  margin-top:30px; font-family:'Fraunces',serif; font-size:1.05rem; cursor:pointer;
+  background:#f6ecd9; color:#3a2c1e; border:none; border-radius:30px; padding:15px 38px;
+  transition:transform .25s var(--ease), box-shadow .25s;
+}
+#open:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35); }
+#gift .fineprint { margin-top:18px; font-size:.66rem; opacity:.4; letter-spacing:.1em; text-transform:uppercase; font-family:'Space Grotesk',sans-serif; }
+
+/* ---------------- responsive ---------------- */
+@media (max-width:1150px) { #house { grid-template-columns:250px 1fr; } #scene { display:none; } }
+@media (max-width:820px) {
+  #house { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; }
+  #rail { flex-direction:row; align-items:center; gap:6px; padding:10px; border-right:none; border-bottom:1px solid var(--border); min-width:0; overflow-x:auto; }
+  #wordmark { display:none; }
+  .room { margin-top:0; padding:6px 8px; gap:6px; flex:1; min-width:0; }
+  .room .rrole { display:none; }
+  .room .rname { font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .room .glyph { width:30px; height:30px; border-radius:9px; font-size:.9rem; }
+  #rail .spacer,#chip,#cb-label { display:none !important; }
+  .rail-btn { width:auto; flex:none; margin-top:0; padding:8px 9px; white-space:nowrap; }
+  #roomhead { padding:14px 18px 0; }
+  #roomhead h1 { font-size:1.1rem; }
+  #chat { padding:14px 16px 6px; }
+  #composer { padding:10px 14px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #v-memoria .pendulum, #v-memoria .mote, #v-familia .steam { animation:none !important; }
+  .msg { animation:none; }
+}
+</style>
+</head>
+<body data-room="familia">
+
+<div id="unboxing">
+  <div id="gift">
+    <div class="para">Para ti</div>
+    <h1>Compañero</h1>
+    <div class="de">un regalo de Edwin</div>
+    <p class="que">Tres compañeros en tu idioma: uno guarda tus historias,
+    uno ordena tu trabajo, y uno sabe dónde está todo en tu casa.</p>
+    <button id="open" onclick="openGift()">Abrir mi regalo</button>
+    <div class="fineprint">prototipo de diseño · experiencia simulada</div>
+  </div>
+</div>
+
+<div id="house">
+  <nav id="rail">
+    <div id="wordmark">Compañero<small>tu casa te habla</small></div>
+    <button class="room" data-room="memoria" onclick="enterRoom('memoria')">
+      <span class="glyph">🕰️</span>
+      <span><span class="rname">Memorias</span><span class="rrole">el guardián de las historias</span></span>
+    </button>
+    <button class="room" data-room="trabajo" onclick="enterRoom('trabajo')">
+      <span class="glyph">💼</span>
+      <span><span class="rname">Trabajo</span><span class="rrole">tu segundo cerebro</span></span>
+    </button>
+    <button class="room" data-room="familia" onclick="enterRoom('familia')">
+      <span class="glyph">🏡</span>
+      <span><span class="rname">Familia</span><span class="rrole">el cerebro de la casa</span></span>
+    </button>
+    <div class="spacer"></div>
+    <div id="chip"></div>
+    <button class="rail-btn" onclick="toggleDrawer()">✎ <span id="cb-label">Mi cuaderno</span></button>
+  </nav>
+
+  <main id="stage">
+    <div id="roomhead"><h1 id="room-title"></h1><span class="cap" id="room-cap"></span></div>
+    <div id="chat"><div class="thread" id="thread"></div></div>
+    <div id="composer">
+      <div class="row">
+        <textarea id="input" rows="1" placeholder="Escríbeme algo…" onkeydown="onKey(event)"></textarea>
+        <button id="send" onclick="send()">Enviar</button>
+      </div>
+    </div>
+  </main>
+
+  <aside id="scene">
+    <div class="vignette" id="v-memoria">
+      <div class="clock">
+        <div class="face"><div class="hand h"></div><div class="hand m"></div></div>
+        <div class="pendulum"></div>
+      </div>
+      <div class="mote" style="left:22%;bottom:10%"></div>
+      <div class="mote" style="left:70%;bottom:22%;animation-delay:-3s"></div>
+      <div class="mote" style="left:45%;bottom:5%;animation-delay:-6s"></div>
+      <div class="caption">el cuarto de las historias</div>
+    </div>
+    <div class="vignette" id="v-trabajo">
+      <div class="grid-bg"></div>
+      <div class="lamp"></div>
+      <div class="paper p1"></div><div class="paper p2"></div><div class="paper p3"></div>
+      <div class="desk"></div>
+      <div class="caption">el estudio</div>
+    </div>
+    <div class="vignette" id="v-familia">
+      <div class="sun"></div>
+      <div class="kettle"></div>
+      <div class="steam" style="top:150px;left:calc(50% + 24px)"></div>
+      <div class="steam" style="top:150px;left:calc(50% + 30px);animation-delay:-1.4s"></div>
+      <div class="stove"></div>
+      <div class="caption">la cocina</div>
+    </div>
+  </aside>
+</div>
+
+<div id="drawer">
+  <h2>Tu perfil</h2>
+  <div class="sub">Para hablarte como te gusta que te hablen.</div>
+  <label>¿Cómo te digo?</label><input id="p-nombre" placeholder="Tu nombre">
+  <label>¿De tú o de usted?</label>
+  <select id="p-trato"><option value="">—</option><option value="tú">De tú</option><option value="usted">De usted</option></select>
+  <label>¿De dónde eres?</label><input id="p-pais" placeholder="País o región">
+  <button id="save-profile" onclick="saveProfile()">Guardar</button>
+  <hr class="divider">
+  <h2>✎ Mi cuaderno</h2>
+  <div class="sub">Lo que me has pedido recordar. Dime «recuerda: …» en cualquier cuarto.</div>
+  <div id="facts"></div>
+  <div id="proto-note">Prototipo de diseño del Compañero · las respuestas están simuladas con los documentos de ejemplo · v1</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ LA CASA DEL COMPAÑERO — prototipo (datos simulados) ============ */
+const ROOMS = {
+  memoria: {
+    title: 'Compañero de Memorias',
+    typing: ['desempolvando recuerdos','hojeando el álbum familiar','leyendo las cartas guardadas','buscando entre las fotos'],
+    greeting: 'Qué gusto conocerte. Soy tu Compañero de Memorias: guardo las historias de tu familia para que el tiempo no se las lleve.',
+    greetingKnown: n => `Hola, ${n}. ¿Qué recuerdo visitamos hoy?`,
+    starters: ['¿Qué recuerdos tienes guardados de mi abuela?','Cuéntame la historia de la boda de mis abuelos','Recuerda: el platillo favorito de papá es el mole de mamá'],
+  },
+  trabajo: {
+    title: 'Compañero de Trabajo',
+    typing: ['revisando tus documentos','buscando en tus notas','ordenando los pendientes','consultando los archivos'],
+    greeting: 'Soy tu Compañero de Trabajo. Tus documentos, notas y pendientes, siempre a la mano y sin rodeos.',
+    greetingKnown: n => `${n}, ¿qué necesitas encontrar hoy?`,
+    starters: ['¿Qué pendientes tengo en mis notas?','Resume la última reunión del proyecto','¿Cuál es el presupuesto del trimestre?'],
+  },
+  familia: {
+    title: 'Compañero Familiar',
+    typing: ['mirando en el cajón de los papeles','revisando las recetas','buscando entre los apuntes de la casa','preguntándole a la nevera'],
+    greeting: '¡Hola! Soy tu Compañero Familiar: el que sabe dónde está todo en esta casa.',
+    greetingKnown: n => `¡Hola, ${n}! ¿Qué se te perdió hoy?`,
+    starters: ['¿Dónde está la garantía de la lavadora?','¿Qué recetas tengo guardadas?','¿Qué datos importantes de la familia tienes?'],
+  },
+};
+
+const SRC = {
+  abuela:   { name:'historia_abuela_carmen.txt' },
+  reunion:  { name:'notas_reunion_proyecto.txt' },
+  casa:     { name:'documentos_de_la_casa.txt' },
+};
+
+/* Respuestas de demostración, ancladas en los documentos de ejemplo reales */
+const DEMO = {
+  memoria: [
+    { keys:['abuel','carmen','historia','recuerd'], text:
+`Tu abuela Carmen suena a pura vida: nació el 3 de abril de 1942 en un pueblo rodeado de naranjos, la tercera de siete hermanos y —según la familia— la más traviesa [1].
+
+Su dicho favorito era "El que no arriesga no cruza el río". Los domingos juntaba a todos en su patio bajo el árbol de mango, y nadie se iba sin un plato de comida y un abrazo largo [1].
+
+¿Quieres que visitemos otro recuerdo suyo?`,
+      srcs:[SRC.abuela] },
+    { keys:['boda','vestido','casó','caso','mole'], text:
+`La boda fue en diciembre de 1965, en la iglesia del pueblo. Tu abuela llevó un vestido que ella misma cosió durante tres meses [1].
+
+En la fiesta sirvió su famoso mole, la receta que heredó de su madre. Su secreto: tostar el chocolate con una pizca de canela y "rezarle a la olla" [1].
+
+Qué imagen tan hermosa, ¿verdad?`,
+      srcs:[SRC.abuela] },
+  ],
+  trabajo: [
+    { keys:['pendiente','tareas','action'], text:
+`Tienes 5 pendientes en las notas del proyecto Aurora [1]:
+
+1. Enviar la propuesta de la fase 2 al cliente — antes del 10 de octubre.
+2. Revisar el presupuesto Q4 con la Lic. Fuentes (cita sin agendar).
+3. Jorge entrega el ambiente de pruebas el viernes 3 de octubre.
+4. Preparar la presentación de avance.
+5. Pedir al cliente los logos en alta resolución (llevan 2 semanas sin enviarlos).
+
+El más urgente es el primero: vence esta semana.`,
+      srcs:[SRC.reunion] },
+    { keys:['resume','resumen','reunión','reunion','proyecto'], text:
+`Reunión del proyecto Aurora, 15 de septiembre [1]:
+
+**Lo importante:** el prototipo va a tiempo; el cliente pidió cambios en reportes que se cotizarán aparte como fase 2.
+
+**Decisiones:** presupuesto Q4 cerrado en $12,500 USD (tope sin aprobación de la Lic. Fuentes); Mariana presentará los mockups directamente al cliente.
+
+**Próxima reunión:** 20 de octubre, 10:00 am, sala 2 — demo del prototipo + cifras de la fase 2.`,
+      srcs:[SRC.reunion] },
+    { keys:['presupuesto','budget','12'], text:
+`El presupuesto del cuarto trimestre quedó en $12,500 USD. No se puede pasar sin aprobación de la Lic. Fuentes [1].
+
+Los cambios de la sección de reportes van por fuera, como fase 2 cotizada aparte.`,
+      srcs:[SRC.reunion] },
+  ],
+  familia: [
+    { keys:['garantía','garantia','lavadora'], text:
+`¡La lavadora! La compraron el 12 de marzo de 2024 en "El Hogar Feliz", con garantía de 2 años válida hasta marzo de 2026 [1].
+
+La factura escaneada está en la carpeta "Recibos" de Drive, y el servicio técnico autorizado es el 555-0134 [1].
+
+Anotado por si un día hace falta.`,
+      srcs:[SRC.casa] },
+    { keys:['receta','arroz','cocinar','comida'], text:
+`Tengo guardada la receta del arroz con leche de la abuela [1]:
+
+**Ingredientes:** 1 taza de arroz, 1 litro de leche entera, 1 raja de canela, cáscara de un limón, 3/4 de taza de azúcar, una pizca de sal.
+
+**Manos a la obra:** cose el arroz con la canela y la cáscara de limón; agrega la leche y hierve 20 minutos a fuego lento, moviendo para que no se pegue; añade el azúcar y la sal, y cocina 10 minutos más hasta que espese. Frío y con canela molida encima, como debe ser.`,
+      srcs:[SRC.casa] },
+    { keys:['cumpleaños','datos','alergia','talla','importante'], text:
+`De la familia tengo apuntado [1]:
+
+- Cumpleaños: mamá el 22 de mayo, papá el 8 de noviembre, Sofía el 30 de julio.
+- Sofía es alérgica a las nueces — lleva su antihistamínico en la mochila.
+- Papá calza 32 y usa camisa mediana.
+- El Dr. Andrade atiende lunes y jueves: 555-7821.`,
+      srcs:[SRC.casa] },
+  ],
+};
+
+const FALLBACK = {
+  memoria: n => `Eso todavía no lo tengo guardado${n?', '+n:''}… ¿me lo cuentas? Me encantaría escucharlo. Y si quieres que lo guarde para siempre, empieza tu mensaje con «recuerda:».`,
+  trabajo: n => `No encontré eso en tus documentos. Prueba con otras palabras, o revisa los temas de las sugerencias de abajo.`,
+  familia: n => `Eso no lo tengo anotado todavía. Si me dices, lo guardo para la próxima: empieza con «recuerda:».`,
+};
+
+/* estado */
+let room = 'familia';
+let profile = { nombre:'', trato:'', pais:'' };
+let onboard = { step:0, done:false };
+let facts = [];           // {id, scope, text, pinned}
+let factSeq = 1;
+const visited = {};
+let typingTimer = null, busy = false;
+const queue = [];         // mensajes que llegan mientras el agente habla
+
+/* ---------------- utilidades ---------------- */
+const $ = id => document.getElementById(id);
+function scrollDown(){ const c=$('chat'); c.scrollTop=c.scrollHeight; }
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3200); }
+
+function addMsg(who, text, srcs){
+  const wrap=document.createElement('div');
+  wrap.className=`msg ${who==='user'?'user':'bot'}`;
+  const b=document.createElement('div'); b.className='bubble'; b.textContent=text;
+  wrap.appendChild(b);
+  if(srcs&&srcs.length){
+    const row=document.createElement('div'); row.className='srcs';
+    row.innerHTML=srcs.map(s=>`<span class="src">📄 ${s.name}</span>`).join('');
+    wrap.appendChild(row);
+  }
+  $('thread').appendChild(wrap); scrollDown(); return wrap;
+}
+
+function showThinking(){
+  const wrap=document.createElement('div');
+  wrap.className='msg bot thinking';
+  wrap.innerHTML='<div class="bubble"><span class="ph"></span><span class="dots"><i>·</i><i>·</i><i>·</i></span></div>';
+  $('thread').appendChild(wrap); scrollDown();
+  const phrases=ROOMS[room].typing;
+  let i=Math.floor(Math.random()*phrases.length);
+  const ph=wrap.querySelector('.ph'); ph.textContent=phrases[i];
+  typingTimer=setInterval(()=>{ i=(i+1)%phrases.length; ph.textContent=phrases[i]; },2400);
+  return wrap;
+}
+
+function streamInto(wrap, fullText, srcs, done){
+  clearInterval(typingTimer);
+  wrap.classList.remove('thinking');
+  const b=wrap.querySelector('.bubble'); b.textContent=''; b.classList.add('caret');
+  const words=fullText.split(/(?<=\s)/); let i=0;
+  (function tick(){
+    if(i<words.length){
+      b.textContent+=words[i++]; scrollDown();
+      setTimeout(tick, 24+Math.random()*60);
+    } else {
+      b.classList.remove('caret');
+      if(srcs&&srcs.length){
+        const row=document.createElement('div'); row.className='srcs';
+        row.innerHTML=srcs.map(s=>`<span class="src">📄 ${s.name}</span>`).join('');
+        wrap.appendChild(row); scrollDown();
+      }
+      busy=false; if(done)done();
+    }
+  })();
+}
+
+function agentReply(text, srcs, done){
+  busy=true;
+  const t=showThinking();
+  setTimeout(()=>streamInto(t,text,srcs,()=>{ if(done)done(); processQueue(); }), 900+Math.random()*900);
+}
+
+function processQueue(){
+  if(busy || !queue.length) return;
+  route(queue.shift());
+}
+
+/* ---------------- unboxing ---------------- */
+function openGift(){
+  $('unboxing').classList.add('gone');
+  $('house').classList.add('revealed');
+  renderChip();  /* lock the other rooms until we know each other */
+  setTimeout(()=>enterRoom('familia'), 500);
+}
+
+/* ---------------- cuartos ---------------- */
+function enterRoom(r){
+  if(!onboard.done && r!=='familia'){ toast('Terminemos de conocernos primero ✨'); return; }
+  room=r;
+  document.body.dataset.room=r;
+  document.querySelectorAll('.room').forEach(b=>b.classList.toggle('active',b.dataset.room===r));
+  document.querySelectorAll('.vignette').forEach(v=>v.classList.remove('on'));
+  $('v-'+r).classList.add('on');
+  $('room-title').textContent=ROOMS[r].title;
+  $('room-cap').textContent={memoria:'historias que no se pierden',trabajo:'todo a la mano, sin rodeos',familia:'el que sabe dónde está todo'}[r];
+  $('thread').innerHTML='';
+  if(!visited[r]){
+    visited[r]=true;
+    if(!onboard.done && r==='familia'){ startOnboarding(); }
+    else {
+      const g = profile.nombre ? ROOMS[r].greetingKnown(profile.nombre) : ROOMS[r].greeting;
+      agentReply(g); showStarters();
+    }
+  }
+  renderFacts();
+}
+
+function showStarters(){
+  if(onboard.done===false) return;
+  const el=document.createElement('div'); el.className='starters';
+  el.innerHTML=ROOMS[room].starters.map(s=>`<button class="starter" onclick="quick(this)">${s}</button>`).join('')
+    +'<div class="hint">Consejo: empieza con «recuerda:» y lo guardaré en tu cuaderno.</div>';
+  $('thread').appendChild(el); scrollDown();
+}
+function quick(btn){ $('input').value=btn.textContent; document.querySelectorAll('.starters').forEach(e=>e.remove()); send(); }
+
+/* ---------------- onboarding (3 preguntas, con calma) ---------------- */
+function startOnboarding(){
+  agentReply(
+    '¡Hola! Qué alegría tenerte en casa. Soy tu Compañero Familiar — aunque en realidad somos tres: uno guarda las historias de tu familia, otro ordena tu trabajo, y yo sé dónde está todo en esta casa.\n\nEdwin nos pidió llegar hasta ti. Antes de empezar, me encantaría saber: ¿cómo te gusta que te digan?'
+  );
+}
+function handleOnboarding(msg){
+  const clean=s=>s.replace(/[.!¡¿?]+$/,'').trim();
+  if(onboard.step===0){
+    let n=clean(msg).replace(/^(me llamo|soy|mi nombre es|puedes decirme|llámame|llamame)\s+/i,'');
+    profile.nombre=n.charAt(0).toUpperCase()+n.slice(1);
+    onboard.step=1; renderChip();
+    agentReply(`Mucho gusto, ${profile.nombre}. Y dime, ¿cómo prefieres que te hable: de tú o de usted?`);
+    return true;
+  }
+  if(onboard.step===1){
+    profile.trato=/usted/i.test(msg)?'usted':'tú';
+    onboard.step=2; renderChip();
+    agentReply(`Perfecto, de ${profile.trato} entonces. ¿Y de dónde eres, ${profile.nombre}? Quiero hablar tu mismo español.`);
+    return true;
+  }
+  if(onboard.step===2){
+    profile.pais=clean(msg).replace(/^(soy de|de)\s+/i,'');
+    onboard.done=true; renderChip();
+    toast(`✨ Encantado de conocerte, ${profile.nombre}`);
+    agentReply(
+      `Listo, ${profile.nombre} de ${profile.pais}: ya sé cómo hablarte. A Edwin le va a dar mucho gusto que ya nos conocemos.\n\nCuando quieras, pásate por los otros cuartos — arriba a la izquierda están Memorias y Trabajo. ¿Y mientras tanto: qué se te perdió hoy?`,
+      null, ()=>showStarters()
+    );
+    return true;
+  }
+  return false;
+}
+
+/* ---------------- conversación ---------------- */
+function send(){
+  const inp=$('input'); const msg=inp.value.trim();
+  if(!msg) return;
+  document.querySelectorAll('.starters').forEach(e=>e.remove());
+  inp.value=''; addMsg('user',msg);
+  queue.push(msg);
+  processQueue();
+}
+
+function route(msg){
+  const remember=msg.match(/^\s*(recuerda|recuérdalo|recuérdame|anota|apunta)\s*[:\-]?\s*(.+)$/is);
+  if(remember){
+    let fact=remember[2].trim().replace(/^que\s+/i,'');
+    facts.push({id:factSeq++,scope:room,text:fact,pinned:false});
+    renderFacts();
+    agentReply(`Lo anoté en tu cuaderno: «${fact}». No lo voy a olvidar. ✎`);
+    return;
+  }
+  if(!onboard.done){ if(handleOnboarding(msg)) return; }
+
+  const lower=msg.toLowerCase();
+  const hit=(DEMO[room]||[]).find(d=>d.keys.some(k=>lower.includes(k)));
+  if(hit){ agentReply(hit.text, hit.srcs); }
+  else   { agentReply(FALLBACK[room](profile.nombre), null, ()=>showStarters()); }
+}
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } }
+
+/* ---------------- perfil + cuaderno ---------------- */
+function renderChip(){
+  if(profile.nombre){
+    $('chip').style.display='block';
+    $('chip').innerHTML=`<b>${profile.nombre}</b>${[profile.trato&&'de '+profile.trato,profile.pais].filter(Boolean).join(' · ')}`;
+    $('p-nombre').value=profile.nombre; $('p-trato').value=profile.trato; $('p-pais').value=profile.pais;
+  }
+  document.querySelectorAll('.room').forEach(b=>
+    b.classList.toggle('locked', !onboard.done && b.dataset.room!=='familia'));
+}
+function saveProfile(){
+  profile={nombre:$('p-nombre').value.trim(),trato:$('p-trato').value,pais:$('p-pais').value.trim()};
+  if(profile.nombre) onboard.done=true;
+  renderChip(); toast('Guardado ✓');
+}
+function renderFacts(){
+  const mine=facts.filter(f=>f.scope===room||f.scope==='general');
+  $('facts').innerHTML=mine.length? mine.map(f=>`
+    <div class="fact ${f.pinned?'pinned':''}">
+      <div class="t">${f.text}</div>
+      <button onclick="pin(${f.id})">${f.pinned?'📌':'📍'}</button>
+      <button onclick="del(${f.id})">✕</button>
+    </div>`).join('')
+    :'<div class="sub">Todavía no hay notas en este cuarto.</div>';
+}
+function pin(id){ const f=facts.find(x=>x.id===id); f.pinned=!f.pinned; renderFacts(); }
+function del(id){ facts=facts.filter(x=>x.id!==id); renderFacts(); }
+function toggleDrawer(){ $('drawer').classList.toggle('open'); renderFacts(); }
+</script>
+</body>
+</html>
