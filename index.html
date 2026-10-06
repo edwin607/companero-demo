@@ -37,23 +37,21 @@ body[data-room="familia"] {
   --font:'Nunito',system-ui,sans-serif; --font-ui:'Nunito',system-ui,sans-serif;
 }
 
-html,body { height:100%; }
 body {
   font-family:var(--font); background:var(--bg); color:var(--ink);
   transition:background .8s var(--ease);
-  overflow:hidden;
 }
 
-/* ---------------- layout ---------------- */
-#house {
-  display:grid; grid-template-columns:250px 1fr 300px;
-  grid-template-rows:minmax(0,1fr);
-  height:100vh; height:100dvh; opacity:0;
-}
+/* ---------------- layout ----------------
+   Native document scroll: no nested scroll containers, nothing to trap.
+   Rail + scene are fixed columns (desktop) / sticky bar (mobile);
+   the composer is sticky-bottom; the page itself scrolls. */
+#house { opacity:0; }
 #house.revealed { opacity:1; transition:opacity .9s var(--ease); }
 
 /* ---------------- the directory (left rail) ---------------- */
 #rail {
+  position:fixed; top:0; left:0; bottom:0; width:250px; overflow-y:auto;
   display:flex; flex-direction:column; border-right:1px solid var(--border);
   background:var(--panel); transition:background .8s var(--ease);
   padding:26px 18px 18px; z-index:5;
@@ -96,7 +94,11 @@ body {
 #chip b { display:block; font-size:.95rem; }
 
 /* ---------------- conversation (center) ---------------- */
-#stage { display:flex; flex-direction:column; min-width:0; min-height:0; }
+#stage {
+  display:flex; flex-direction:column; min-width:0;
+  margin:0 300px 0 250px;
+  min-height:100vh; min-height:100dvh;
+}
 #roomhead {
   padding:18px 26px 0; display:flex; align-items:baseline; gap:12px; min-width:0;
 }
@@ -106,7 +108,7 @@ body[data-room="trabajo"] #roomhead h1 { font-weight:600; }
 body[data-room="familia"] #roomhead h1 { font-weight:800; }
 #roomhead .cap { font-size:.8rem; color:var(--muted); font-style:italic; }
 body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
-#chat { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:20px 26px 8px; }
+#chat { flex:1; padding:20px 26px 8px; }
 .thread { max-width:640px; margin:0 auto; }
 .msg { margin-bottom:18px; display:flex; flex-direction:column; animation:rise .45s var(--ease) both; }
 @keyframes rise { from { opacity:0; transform:translateY(10px); } }
@@ -138,7 +140,12 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 .starter:hover { border-color:var(--accent); transform:translateX(3px); }
 .hint { text-align:center; color:var(--muted); font-size:.76rem; margin-top:8px; }
 
-#composer { padding:14px 26px 18px; }
+#composer {
+  position:sticky; bottom:0; z-index:15;
+  padding:14px 26px calc(18px + env(safe-area-inset-bottom, 0px));
+  background:var(--bg); border-top:1px solid var(--border);
+  transition:background .8s var(--ease);
+}
 #composer .row { max-width:640px; margin:0 auto; display:flex; gap:10px; }
 #input {
   flex:1; font-family:var(--font); font-size:.97rem; resize:none; color:var(--ink);
@@ -155,7 +162,8 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 
 /* ---------------- the room scene (right) ---------------- */
 #scene {
-  position:relative; overflow:hidden; border-left:1px solid var(--border);
+  position:fixed; top:0; right:0; bottom:0; width:300px; overflow:hidden;
+  border-left:1px solid var(--border);
   background:linear-gradient(160deg,var(--scene),var(--scene-deep));
   transition:background .8s var(--ease);
 }
@@ -203,7 +211,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 
 /* ---------------- drawer (cuaderno + perfil) ---------------- */
 #drawer {
-  position:fixed; top:0; right:-380px; width:340px; max-width:92vw; height:100vh;
+  position:fixed; top:0; right:-380px; width:340px; max-width:92vw; height:100vh; height:100dvh;
   background:var(--panel); border-left:1px solid var(--border); z-index:30;
   transition:right .3s var(--ease); padding:22px; overflow-y:auto;
 }
@@ -236,7 +244,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 
 /* ---------------- unboxing ---------------- */
 #unboxing {
-  position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+  position:fixed; inset:0; z-index:50; display:flex; overflow-y:auto; padding:24px;
   background:
     radial-gradient(1200px 700px at 20% 10%, #4b3524, transparent),
     radial-gradient(1000px 700px at 85% 90%, #5d4426, transparent),
@@ -245,6 +253,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 }
 #unboxing.gone { opacity:0; visibility:hidden; }
 #gift {
+  margin:auto; /* centers, but lets the overlay scroll if the card is taller than the screen */
   width:min(480px,88vw); text-align:center; color:#f6ecd9; padding:46px 40px 40px;
   background:linear-gradient(165deg,#584231,#463323);
   border:1px solid rgba(246,236,217,.14); border-radius:26px;
@@ -268,10 +277,15 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 #gift .fineprint { margin-top:18px; font-size:.66rem; opacity:.4; letter-spacing:.1em; text-transform:uppercase; font-family:'Space Grotesk',sans-serif; }
 
 /* ---------------- responsive ---------------- */
-@media (max-width:1150px) { #house { grid-template-columns:250px 1fr; } #scene { display:none; } }
+@media (max-width:1150px) { #scene { display:none; } #stage { margin-right:0; } }
 @media (max-width:820px) {
-  #house { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
-  #rail { flex-direction:row; align-items:center; gap:6px; padding:10px; border-right:none; border-bottom:1px solid var(--border); min-width:0; overflow-x:auto; }
+  #rail {
+    position:sticky; top:0; bottom:auto; width:auto; height:auto;
+    flex-direction:row; align-items:center; gap:6px; padding:10px;
+    border-right:none; border-bottom:1px solid var(--border);
+    min-width:0; overflow-x:auto; overflow-y:hidden;
+  }
+  #stage { margin:0; min-height:calc(100vh - 52px); min-height:calc(100dvh - 52px); }
   #wordmark { display:none; }
   .room { margin-top:0; padding:6px 8px; gap:6px; flex:1; min-width:0; }
   .room .rrole { display:none; }
@@ -282,7 +296,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
   #roomhead { padding:14px 18px 0; }
   #roomhead h1 { font-size:1.1rem; }
   #chat { padding:14px 16px 6px; }
-  #composer { padding:10px 14px 14px; }
+  #composer { padding:10px 14px calc(14px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   #v-memoria .pendulum, #v-memoria .mote, #v-familia .steam { animation:none !important; }
@@ -376,7 +390,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
   <h2>✎ Mi cuaderno</h2>
   <div class="sub">Lo que me has pedido recordar. Dime «recuerda: …» en cualquier cuarto.</div>
   <div id="facts"></div>
-  <div id="proto-note">Prototipo de diseño del Compañero · las respuestas están simuladas con los documentos de ejemplo · v1</div>
+  <div id="proto-note">Prototipo de diseño del Compañero · las respuestas están simuladas con los documentos de ejemplo · v1.2</div>
 </div>
 
 <div id="toast"></div>
@@ -502,7 +516,13 @@ const queue = [];         // mensajes que llegan mientras el agente habla
 
 /* ---------------- utilidades ---------------- */
 const $ = id => document.getElementById(id);
-function scrollDown(){ const c=$('chat'); c.scrollTop=c.scrollHeight; }
+/* native page scroll: follow the conversation, but let the user scroll up to read */
+let stick = true;
+function nearBottom(){ return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 140; }
+window.addEventListener('scroll', ()=>{ stick = nearBottom(); }, {passive:true});
+function scrollDown(force){
+  if(force || stick) window.scrollTo(0, document.documentElement.scrollHeight);
+}
 function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3200); }
 
 function addMsg(who, text, srcs){
@@ -515,14 +535,14 @@ function addMsg(who, text, srcs){
     row.innerHTML=srcs.map(s=>`<span class="src">📄 ${s.name}</span>`).join('');
     wrap.appendChild(row);
   }
-  $('thread').appendChild(wrap); scrollDown(); return wrap;
+  $('thread').appendChild(wrap); scrollDown(who==='user'); return wrap;
 }
 
 function showThinking(){
   const wrap=document.createElement('div');
   wrap.className='msg bot thinking';
   wrap.innerHTML='<div class="bubble"><span class="ph"></span><span class="dots"><i>·</i><i>·</i><i>·</i></span></div>';
-  $('thread').appendChild(wrap); scrollDown();
+  $('thread').appendChild(wrap); scrollDown();  /* no force: the user's own message already scrolled; respect them if they scrolled up to read */
   const phrases=ROOMS[room].typing;
   let i=Math.floor(Math.random()*phrases.length);
   const ph=wrap.querySelector('.ph'); ph.textContent=phrases[i];
@@ -581,6 +601,7 @@ function enterRoom(r){
   $('room-title').textContent=ROOMS[r].title;
   $('room-cap').textContent={memoria:'historias que no se pierden',trabajo:'todo a la mano, sin rodeos',familia:'el que sabe dónde está todo'}[r];
   $('thread').innerHTML='';
+  window.scrollTo(0,0); stick=true;
   if(!visited[r]){
     visited[r]=true;
     if(!onboard.done && r==='familia'){ startOnboarding(); }
