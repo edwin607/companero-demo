@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compañero — prototipo de experiencia</title>
+<title>Compañero — para Ani</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Grotesk:wght@300..700&family=Nunito:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
@@ -308,7 +308,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
 
 <div id="unboxing">
   <div id="gift">
-    <div class="para">Para ti</div>
+    <div class="para">Para Ani</div>
     <h1>Compañero</h1>
     <div class="de">un regalo de Edwin</div>
     <p class="que">Tres compañeros en tu idioma: uno guarda tus historias,
@@ -390,7 +390,7 @@ body[data-room="trabajo"] #roomhead .cap { font-style:normal; }
   <h2>✎ Mi cuaderno</h2>
   <div class="sub">Lo que me has pedido recordar. Dime «recuerda: …» en cualquier cuarto.</div>
   <div id="facts"></div>
-  <div id="proto-note">Prototipo de diseño del Compañero · las respuestas están simuladas con los documentos de ejemplo · v1.2</div>
+  <div id="proto-note">Prototipo de diseño del Compañero · respuestas simuladas a partir del chat real de WhatsApp (2021–2026) · v2 · para Ani</div>
 </div>
 
 <div id="toast"></div>
@@ -401,107 +401,104 @@ const ROOMS = {
   memoria: {
     title: 'Compañero de Memorias',
     typing: ['desempolvando recuerdos','hojeando el álbum familiar','leyendo las cartas guardadas','buscando entre las fotos'],
-    greeting: 'Qué gusto conocerte. Soy tu Compañero de Memorias: guardo las historias de tu familia para que el tiempo no se las lleve.',
+    greeting: 'Qué gusto conocerte. Soy tu Compañero de Memorias: guardo las historias para que el tiempo no se las lleve.',
     greetingKnown: n => `Hola, ${n}. ¿Qué recuerdo visitamos hoy?`,
-    starters: ['¿Qué recuerdos tienes guardados de mi abuela?','Cuéntame la historia de la boda de mis abuelos','Recuerda: el platillo favorito de papá es el mole de mamá'],
+    starters: ['¿Cómo empezó este chat?','¿Qué significa «holiwis mana»?','¿Te acuerdas de los pasteles?'],
   },
   trabajo: {
     title: 'Compañero de Trabajo',
     typing: ['revisando tus documentos','buscando en tus notas','ordenando los pendientes','consultando los archivos'],
-    greeting: 'Soy tu Compañero de Trabajo. Tus documentos, notas y pendientes, siempre a la mano y sin rodeos.',
+    greeting: 'Soy tu Compañero de Trabajo. Tus estudios, proyectos y pendientes, siempre a la mano y sin rodeos.',
     greetingKnown: n => `${n}, ¿qué necesitas encontrar hoy?`,
-    starters: ['¿Qué pendientes tengo en mis notas?','Resume la última reunión del proyecto','¿Cuál es el presupuesto del trimestre?'],
+    starters: ['¿Qué sabes de la tesis?','¿Qué era la araña de Blender?','¿Edwin daba clases?'],
   },
   familia: {
     title: 'Compañero Familiar',
     typing: ['mirando en el cajón de los papeles','revisando las recetas','buscando entre los apuntes de la casa','preguntándole a la nevera'],
-    greeting: '¡Hola! Soy tu Compañero Familiar: el que sabe dónde está todo en esta casa.',
-    greetingKnown: n => `¡Hola, ${n}! ¿Qué se te perdió hoy?`,
-    starters: ['¿Dónde está la garantía de la lavadora?','¿Qué recetas tengo guardadas?','¿Qué datos importantes de la familia tienes?'],
+    greeting: '¡Holiwis! Soy tu Compañero Familiar: el que sabe dónde está todo en esta casa.',
+    greetingKnown: n => `¡Holiwis, ${n}! ¿Qué se te perdió hoy?`,
+    starters: ['¿Cuándo es mi cumpleaños?','¿Qué sabes del gato?','¿Qué cocina Edwin?'],
   },
 };
 
 const SRC = {
-  abuela:   { name:'historia_abuela_carmen.txt' },
-  reunion:  { name:'notas_reunion_proyecto.txt' },
-  casa:     { name:'documentos_de_la_casa.txt' },
+  chat:     { name:'chat_whatsapp_ani_y_edwin.txt' },
+  fechas:   { name:'fechas_importantes.txt' },
+  estudios: { name:'proyectos_y_estudios.txt' },
 };
 
-/* Respuestas de demostración, ancladas en los documentos de ejemplo reales */
+/* Respuestas de demostración, ancladas en el chat real de WhatsApp de Ani y Edwin (2021–2026) */
 const DEMO = {
   memoria: [
-    { keys:['abuel','carmen','historia','recuerd'], text:
-`Tu abuela Carmen suena a pura vida: nació el 3 de abril de 1942 en un pueblo rodeado de naranjos, la tercera de siete hermanos y —según la familia— la más traviesa [1].
+    { keys:['empez','comenz','primer','origen','mensaje','cuándo','cuando','historia'], text:
+`Este chat nació el 6 de octubre de 2021, a las 4:49 de la tarde. Edwin escribió «Test», tú respondiste «Sip», y así, sin ninguna ceremonia, empezó todo [1].
 
-Su dicho favorito era "El que no arriesga no cruza el río". Los domingos juntaba a todos en su patio bajo el árbol de mango, y nadie se iba sin un plato de comida y un abrazo largo [1].
+Desde entonces: **11,882 mensajes** repartidos en 527 días de conversación, unas 200 llamadas de voz, y 1,405 fotos y videos que no caben en un archivo de texto [1].
 
-¿Quieres que visitemos otro recuerdo suyo?`,
-      srcs:[SRC.abuela] },
-    { keys:['boda','vestido','casó','caso','mole'], text:
-`La boda fue en diciembre de 1965, en la iglesia del pueblo. Tu abuela llevó un vestido que ella misma cosió durante tres meses [1].
+Nada mal para un «Test».`,
+      srcs:[SRC.chat] },
+    { keys:['holiwis','mana','saludo','risa','🤣','jaja','emoji'], text:
+`«Holiwis mana» es tu firma en este chat: lo has escrito **31 veces**, y sus variantes «holi mana» y «hola mana» suman otras tantas [1].
 
-En la fiesta sirvió su famoso mole, la receta que heredó de su madre. Su secreto: tostar el chocolate con una pizca de canela y "rezarle a la olla" [1].
+Y tu risa oficial es 🤣: la has mandado **362 veces**, más que todos tus demás emojis juntos [1].
 
-Qué imagen tan hermosa, ¿verdad?`,
-      srcs:[SRC.abuela] },
+Si Edwin alguna vez necesita pruebas de tu existencia, con eso le basta.`,
+      srcs:[SRC.chat] },
+    { keys:['café','cafe','centro','visita','vernos'], text:
+`El plan clásico de ustedes tiene nombre propio: «el centro». En marzo de 2022 escribiste «Yo quería invitarte un café 🤣🤣🤣», y desde entonces el «subo al centro a ver si nos vemos» se volvió ritual [1].
+
+Tú preguntabas «¿y cuándo me visitas?», y Edwin prometía pasar por el centro [1].
+
+Café pendiente, como debe ser.`,
+      srcs:[SRC.chat] },
+    { keys:['pastel','postre','horno','dulce'], text:
+`Septiembre de 2022: «Hoy estaré en casa haciendo pasteles». Al día siguiente, Edwin apareció a preguntar cómo te había ido [1].
+
+El resultado no quedó en el chat… eso solo lo sabes tú. Si me lo cuentas empezando con «recuerda:», lo guardo para siempre.`,
+      srcs:[SRC.chat] },
   ],
   trabajo: [
-    { keys:['pendiente','tareas','action'], text:
-`Tienes 5 pendientes en las notas del proyecto Aurora [1]:
+    { keys:['tesis','estudi','videojuego','maestría','maestria','carrera'], text:
+`De estudios hay historial de los dos lados: tú estabas con la tesis en 2022 («Estoy en tesis», mayo de 2022), y en noviembre de 2024 andabas con temas de videojuegos, que dijiste se te hacían más fáciles [1].
 
-1. Enviar la propuesta de la fase 2 al cliente — antes del 10 de octubre.
-2. Revisar el presupuesto Q4 con la Lic. Fuentes (cita sin agendar).
-3. Jorge entrega el ambiente de pruebas el viernes 3 de octubre.
-4. Preparar la presentación de avance.
-5. Pedir al cliente los logos en alta resolución (llevan 2 semanas sin enviarlos).
+Edwin, por su lado, cerró su maestría en Nueva York en 2025 [2].`,
+      srcs:[SRC.chat, SRC.estudios] },
+    { keys:['clases','cato','docen','enseña','santa cruz','proyecto'], text:
+`Consta que Edwin dio clases en la Cato («viernes no doy clases», agosto de 2023), y que a finales de 2022 andaba metido en un proyecto en pueblos de Santa Cruz [1].
 
-El más urgente es el primero: vence esta semana.`,
-      srcs:[SRC.reunion] },
-    { keys:['resume','resumen','reunión','reunion','proyecto'], text:
-`Reunión del proyecto Aurora, 15 de septiembre [1]:
+Historial laboral documentado, vía chat.`,
+      srcs:[SRC.chat] },
+    { keys:['blender','araña','arana','spider','código','codigo','python','anim'], text:
+`La araña: en algún punto de este chat, Edwin pegó medio script de Blender en Python — colección «spider», patas numeradas, rotaciones en radianes, materiales negros [1].
 
-**Lo importante:** el prototipo va a tiempo; el cliente pidió cambios en reportes que se cotizarán aparte como fase 2.
-
-**Decisiones:** presupuesto Q4 cerrado en $12,500 USD (tope sin aprobación de la Lic. Fuentes); Mariana presentará los mockups directamente al cliente.
-
-**Próxima reunión:** 20 de octubre, 10:00 am, sala 2 — demo del prototipo + cifras de la fase 2.`,
-      srcs:[SRC.reunion] },
-    { keys:['presupuesto','budget','12'], text:
-`El presupuesto del cuarto trimestre quedó en $12,500 USD. No se puede pasar sin aprobación de la Lic. Fuentes [1].
-
-Los cambios de la sección de reportes van por fuera, como fase 2 cotizada aparte.`,
-      srcs:[SRC.reunion] },
+Conclusión inevitable: en algún rincón del mundo existe una araña digital hecha a pulso de código.`,
+      srcs:[SRC.chat] },
   ],
   familia: [
-    { keys:['garantía','garantia','lavadora'], text:
-`¡La lavadora! La compraron el 12 de marzo de 2024 en "El Hogar Feliz", con garantía de 2 años válida hasta marzo de 2026 [1].
+    { keys:['cumple','carnaval','febrero','abril','fecha'], text:
+`Tu cumpleaños es el **17 de febrero**, en plena temporada de carnaval [1].
 
-La factura escaneada está en la carpeta "Recibos" de Drive, y el servicio técnico autorizado es el 555-0134 [1].
+Y que conste en acta: el 17 de febrero de 2025, Edwin escribió «Ya me perdí tu cumple?» [2]. Casi se le pasa. Se lo perdonaste… pero yo ya lo tengo vigilado: no volverá a ocurrir.
 
-Anotado por si un día hace falta.`,
-      srcs:[SRC.casa] },
-    { keys:['receta','arroz','cocinar','comida'], text:
-`Tengo guardada la receta del arroz con leche de la abuela [1]:
+El de Edwin cae a finales de abril, por si quieres devolverle el susto [1].`,
+      srcs:[SRC.fechas, SRC.chat] },
+    { keys:['gato','michi','gata','mascota'], text:
+`En febrero de 2022 anunciaste: «Estoy adoptando gato 😁». Y unos meses antes ya habías declarado «Ame al gato 🤣🤣🤣» [1].
 
-**Ingredientes:** 1 taza de arroz, 1 litro de leche entera, 1 raja de canela, cáscara de un limón, 3/4 de taza de azúcar, una pizca de sal.
+Lo que no tengo apuntado es su nombre. Dímelo empezando con «recuerda:» y lo guardo de una vez.`,
+      srcs:[SRC.chat] },
+    { keys:['cocina','rigatoni','receta','comida','cena','almuerzo'], text:
+`De la cocina de Edwin hay constancia: el 5 de febrero de 2022 cocinó para doce personas, nada menos que **rigatoni con salsa de carne y parmesano** [1].
 
-**Manos a la obra:** cose el arroz con la canela y la cáscara de limón; agrega la leche y hierve 20 minutos a fuego lento, moviendo para que no se pegue; añade el azúcar y la sal, y cocina 10 minutos más hasta que espese. Frío y con canela molida encima, como debe ser.`,
-      srcs:[SRC.casa] },
-    { keys:['cumpleaños','datos','alergia','talla','importante'], text:
-`De la familia tengo apuntado [1]:
-
-- Cumpleaños: mamá el 22 de mayo, papá el 8 de noviembre, Sofía el 30 de julio.
-- Sofía es alérgica a las nueces — lleva su antihistamínico en la mochila.
-- Papá calza 32 y usa camisa mediana.
-- El Dr. Andrade atiende lunes y jueves: 555-7821.`,
-      srcs:[SRC.casa] },
+Cocinar para doce no es improvisar: es compromiso.`,
+      srcs:[SRC.chat] },
   ],
 };
 
 const FALLBACK = {
-  memoria: n => `Eso todavía no lo tengo guardado${n?', '+n:''}… ¿me lo cuentas? Me encantaría escucharlo. Y si quieres que lo guarde para siempre, empieza tu mensaje con «recuerda:».`,
-  trabajo: n => `No encontré eso en tus documentos. Prueba con otras palabras, o revisa los temas de las sugerencias de abajo.`,
-  familia: n => `Eso no lo tengo anotado todavía. Si me dices, lo guardo para la próxima: empieza con «recuerda:».`,
+  memoria: n => `Eso no aparece en los 11,882 mensajes que tengo a la mano${n?', '+n:''}… ¿me lo cuentas? Si empiezas con «recuerda:», lo guardo para siempre.`,
+  trabajo: n => `Eso no está en las notas de proyectos y estudios. Prueba con otras palabras, o con las sugerencias de abajo.`,
+  familia: n => `Eso no lo tengo apuntado todavía. Si me lo dices empezando con «recuerda:», lo guardo para la próxima.`,
 };
 
 /* estado */
@@ -550,14 +547,17 @@ function showThinking(){
   return wrap;
 }
 
+/* minimal bold: **texto** (agent copy is hardcoded/trusted) */
+function md(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>'); }
+
 function streamInto(wrap, fullText, srcs, done){
   clearInterval(typingTimer);
   wrap.classList.remove('thinking');
   const b=wrap.querySelector('.bubble'); b.textContent=''; b.classList.add('caret');
-  const words=fullText.split(/(?<=\s)/); let i=0;
+  const words=fullText.split(/(?<=\s)/); let i=0, acc='';
   (function tick(){
     if(i<words.length){
-      b.textContent+=words[i++]; scrollDown();
+      acc+=words[i++]; b.innerHTML=md(acc); scrollDown();
       setTimeout(tick, 24+Math.random()*60);
     } else {
       b.classList.remove('caret');
@@ -625,7 +625,7 @@ function quick(btn){ $('input').value=btn.textContent; document.querySelectorAll
 /* ---------------- onboarding (3 preguntas, con calma) ---------------- */
 function startOnboarding(){
   agentReply(
-    '¡Hola! Qué alegría tenerte en casa. Soy tu Compañero Familiar — aunque en realidad somos tres: uno guarda las historias de tu familia, otro ordena tu trabajo, y yo sé dónde está todo en esta casa.\n\nEdwin nos pidió llegar hasta ti. Antes de empezar, me encantaría saber: ¿cómo te gusta que te digan?'
+    '¡Holiwis! Qué alegría tenerte en casa. Soy tu Compañero Familiar, aunque en realidad somos tres: uno guarda las historias, otro ordena el trabajo, y yo sé dónde está todo en esta casa.\n\nEdwin nos pidió llegar hasta ti. Antes de empezar, me encantaría saber: ¿cómo te gusta que te digan?'
   );
 }
 function handleOnboarding(msg){
